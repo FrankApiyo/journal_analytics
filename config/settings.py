@@ -46,6 +46,12 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ("documents.authentication.LiveViewAuth",),
 }
 
+# Celery configuration
+CELERY_BROKER_URL = "redis://localhost:6379/7"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
 JOURNAL_API_URL = "http://localhost:4000"
 
 
@@ -90,7 +96,7 @@ DATABASES = {
         "NAME": "live_view_svelte_offline_demo_dev",
         "USER": "postgres",
         "PASSWORD": "postgres",
-        "HOST": "postgres",  # Must match the service name in docker-compose.yml
+        "HOST": "localhost",
         "PORT": "5432",
     }
 }
