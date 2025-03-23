@@ -3,6 +3,7 @@ import uuid
 
 
 class UserDocument(models.Model):
+    user_id = models.IntegerField(null=False, blank=False, default=-1)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=50000)
     body = models.TextField()
@@ -10,4 +11,4 @@ class UserDocument(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.name)
+        return f"{self.name} (User ID: {self.user_id})"

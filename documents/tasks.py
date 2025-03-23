@@ -12,9 +12,11 @@ def sync_user_documents(token):
     )
 
     if response.status_code == 200:
-        data = response.json().get("documents", [])
+        data = response.json()
 
         for doc in data:
             UserDocument.objects.update_or_create(
-                id=doc["id"], defaults={"name": doc["name"], "body": doc["body"]}
+                user_id=doc["user_id"],
+                id=doc["id"],
+                defaults={"name": doc["name"], "body": doc["body"]},
             )
