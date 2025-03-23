@@ -20,7 +20,7 @@ class TestAuth4(BaseAuthentication):
 
         key = auth_header.split("Bearer ")[1]
 
-        return (None, {"key": key, "user_id": 4})
+        return (None, {"key": key, "user_id": 4, "role": "default"})
 
 
 class TestAuth2(BaseAuthentication):
@@ -33,7 +33,20 @@ class TestAuth2(BaseAuthentication):
 
         key = auth_header.split("Bearer ")[1]
 
-        return (None, {"key": key, "user_id": 2})
+        return (None, {"key": key, "user_id": 2, "role": "defualt"})
+
+
+class TestAuth2Admin(BaseAuthentication):
+    """Mock authentication for tests."""
+
+    def authenticate(self, request):
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise AuthenticationFailed("Invalid token")
+
+        key = auth_header.split("Bearer ")[1]
+
+        return (None, {"key": key, "user_id": 2, "role": "admin"})
 
 
 @override_settings(
@@ -71,6 +84,21 @@ class UserDocumentViewSetTest(APITestCase):
     @patch("documents.tasks.sync_user_documents.delay")
     @patch.object(UserDocumentViewSet, "permission_classes", [permissions.AllowAny])
     @patch.object(UserDocumentViewSet, "authentication_classes", [TestAuth4])
+    def test_list_documents_returns_documents_user4(self, mock_sync):
+        """Test that the view returns user documents without executing the sync task."""
+        response = self.client.get("/api/user_documents/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        expected_data = UserDocumentSerializer([self.doc1, self.doc2], many=True).data
+
+        self.assertEqual(response.json(), expected_data)
+
+        mock_sync.assert_called_once_with("test_token")
+
+    @patch("documents.tasks.sync_user_documents.delay")
+    @patch.object(UserDocumentViewSet, "permission_classes", [permissions.AllowAny])
+    @patch.object(UserDocumentViewSet, "authentication_classes", [TestAuth2Admin])
     def test_list_documents_returns_documents_user4(self, mock_sync):
         """Test that the view returns user documents without executing the sync task."""
         response = self.client.get("/api/user_documents/")

@@ -8,7 +8,7 @@ class LiveViewAuth(TokenAuthentication):
     keyword = "Bearer"
 
     def authenticate_credentials(self, key):
-        """Validate the JWT with the external API and extract the user ID."""
+        """Validate the JWT with the external API and extract the user ID and role."""
         response = requests.get(
             f"{settings.JOURNAL_API_URL}/api/auth_check",
             headers={"Authorization": f"Bearer {key}"},
@@ -21,11 +21,12 @@ class LiveViewAuth(TokenAuthentication):
         try:
             data = response.json()
             user_id = data.get("user_id")
+            role = data.get("role", "user")  # Default to 'user' if role is not provided
             if not user_id:
                 raise AuthenticationFailed("User ID not found in token")
         except ValueError:
             raise AuthenticationFailed("Invalid token response")
 
         # Return a tuple of (None, token_payload)
-        # Here, token_payload is a dictionary containing the key and user_id
-        return (None, {"key": key, "user_id": user_id})
+        # token_payload includes key, user_id, and role
+        return (None, {"key": key, "user_id": user_id, "role": role})

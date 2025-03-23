@@ -15,14 +15,18 @@ class UserDocumentViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        """Filter documents by the user_id from the token payload."""
+        """Filter documents based on the user's role."""
         token_payload = self.request.auth
         user_id = token_payload.get("user_id")
+        role = token_payload.get("role", "user")
 
         if not user_id:
             return UserDocument.objects.none()
 
-        return UserDocument.objects.filter(user_id=user_id)
+        if role == "admin":
+            return UserDocument.objects.all()
+        else:
+            return UserDocument.objects.filter(user_id=user_id)
 
     @swagger_auto_schema(
         operation_description="List all user documents and trigger an async sync task.",
