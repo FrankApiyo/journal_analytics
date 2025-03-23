@@ -10,7 +10,7 @@ class LiveViewAuth(TokenAuthentication):
     def authenticate_credentials(self, key):
         """Validate the JWT with the external API."""
         response = requests.get(
-            f"{settings.JOURNAL_API_URL}/api/auth",
+            f"{settings.JOURNAL_API_URL}/api/auth_check",
             headers={"Authorization": f"Bearer {key}"},
         )
 
