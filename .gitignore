@@ -19,9 +19,6 @@ staticfiles/
 *.log
 *.pot
 
-# Migrations
-**/migrations/**/000*.py
-**/migrations/**/__pycache__/
 
 # IDE / Editor
 .vscode/
