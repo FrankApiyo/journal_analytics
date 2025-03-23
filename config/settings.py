@@ -42,6 +42,13 @@ INSTALLED_APPS = [
 ]
 
 
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": ("documents.authentication.LiveViewAuth",),
+}
+
+JOURNAL_API_URL = "http://localhost:4000"
+
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
