@@ -1,0 +1,54 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env
+*.env
+Pipfile
+Pipfile.lock
+
+# Django and database
+db.sqlite3
+*.sqlite3
+instance/
+media/
+staticfiles/
+*.log
+*.pot
+
+# Migrations
+**/migrations/**/000*.py
+**/migrations/**/__pycache__/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+**/__pycache__/
+
+# Node.js (if using frontend assets)
+node_modules/
+*.map
+npm-debug.log*
+yarn-error.log
+
+# Pytest and coverage
+.coverage
+*.cover
+htmlcov/
+.cache/
+pytest_cache/
+
