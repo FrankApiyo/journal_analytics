@@ -10,8 +10,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from documents.views import UserDocumentViewSet
 
 
-# Define Test Authentication Class inside the test file
-class TestAuth(BaseAuthentication):
+class TestAuth4(BaseAuthentication):
     """Mock authentication for tests."""
 
     def authenticate(self, request):
@@ -19,12 +18,27 @@ class TestAuth(BaseAuthentication):
         if not auth_header or not auth_header.startswith("Bearer "):
             raise AuthenticationFailed("Invalid token")
 
-        return (None, "test_token")  # No user, just a mock token
+        key = auth_header.split("Bearer ")[1]
+
+        return (None, {"key": key, "user_id": 4})
+
+
+class TestAuth2(BaseAuthentication):
+    """Mock authentication for tests."""
+
+    def authenticate(self, request):
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise AuthenticationFailed("Invalid token")
+
+        key = auth_header.split("Bearer ")[1]
+
+        return (None, {"key": key, "user_id": 2})
 
 
 @override_settings(
     REST_FRAMEWORK={
-        "DEFAULT_AUTHENTICATION_CLASSES": ("documents.tests.test_views.TestAuth",)
+        "DEFAULT_AUTHENTICATION_CLASSES": ("documents.tests.test_views.TestAuth4",)
     }
 )
 class UserDocumentViewSetTest(APITestCase):
@@ -46,7 +60,7 @@ class UserDocumentViewSetTest(APITestCase):
 
     @patch("documents.tasks.sync_user_documents.delay")
     @patch.object(UserDocumentViewSet, "permission_classes", [permissions.AllowAny])
-    @patch.object(UserDocumentViewSet, "authentication_classes", [TestAuth])
+    @patch.object(UserDocumentViewSet, "authentication_classes", [TestAuth4])
     def test_list_documents_triggers_sync_task(self, mock_sync):
         """Test that listing documents triggers the async sync task."""
         response = self.client.get("/api/user_documents/")
@@ -56,8 +70,8 @@ class UserDocumentViewSetTest(APITestCase):
 
     @patch("documents.tasks.sync_user_documents.delay")
     @patch.object(UserDocumentViewSet, "permission_classes", [permissions.AllowAny])
-    @patch.object(UserDocumentViewSet, "authentication_classes", [TestAuth])
-    def test_list_documents_returns_documents(self, mock_sync):
+    @patch.object(UserDocumentViewSet, "authentication_classes", [TestAuth4])
+    def test_list_documents_returns_documents_user4(self, mock_sync):
         """Test that the view returns user documents without executing the sync task."""
         response = self.client.get("/api/user_documents/")
 
@@ -69,7 +83,20 @@ class UserDocumentViewSetTest(APITestCase):
 
         mock_sync.assert_called_once_with("test_token")
 
-    @patch.object(UserDocumentViewSet, "authentication_classes", [TestAuth])
+    @patch("documents.tasks.sync_user_documents.delay")
+    @patch.object(UserDocumentViewSet, "permission_classes", [permissions.AllowAny])
+    @patch.object(UserDocumentViewSet, "authentication_classes", [TestAuth2])
+    def test_list_documents_returns_documents_user2(self, mock_sync):
+        """Test that the view returns user documents without executing the sync task."""
+        response = self.client.get("/api/user_documents/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(response.json(), [])
+
+        mock_sync.assert_called_once_with("test_token")
+
+    @patch.object(UserDocumentViewSet, "authentication_classes", [TestAuth4])
     def test_unauthenticated_user_cannot_access_documents(self):
         """Test that an unauthenticated user is denied access."""
         self.client.credentials()  # Remove authentication
